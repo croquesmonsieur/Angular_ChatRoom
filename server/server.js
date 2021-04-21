@@ -8,8 +8,9 @@ app.use(express.static(clientPath));
 const server = http.createServer(app);
 const io = require('socket.io')(server);
 const port = 6969;
-
-let counter = 0;
+//const ioPr = io.of('/privateRoom');
+let room_number = 1;
+let user_counter = 0;
 
 let users_chatbox = [];
 let connections = [];
@@ -17,21 +18,26 @@ let connections = [];
 server.listen(port, () => {
     console.log("server running on " + port);
 });
-
+/*
+ioPr.on('connection', (socket) => {
+    console.log('someone new connected');
+    ioPr.emit('privateEntry', { message: 'A new user has joined!' });
+});
+*/
 io.on('connection', (socket) => {
-    console.log(counter + ' someone connected');
-    counter++;
+    console.log(user_counter + ' someone connected');
+    user_counter++;
     connections.push(socket);
     let color = randomColor();
     socket.username = 'Anonymous';
     socket.color = color;
 
     socket.on('sendToAll', (message) => {
-        io.emit("displayMessage", (message));
+        io.emit("displayMessageAll", ({message: message, color: color}));
     });
 
     socket.on('sendToMe', (message) => {
-        socket.emit("displayMessage", (message));
+        socket.emit("displayMessageMe", ({message: message, color: color}));
     });
 
     socket.on('listUsers', (users) => {
@@ -39,13 +45,14 @@ io.on('connection', (socket) => {
         socket.id = id;
         socket.username = users;
         users_chatbox.unshift({id, username: socket.username, color: socket.color});
-        socket.emit('announcements', { message: 'A new user has joined!' });
+        io.emit('announcements', { message: 'A new user has joined!' });
         io.emit('usersInfo', (users_chatbox));
         io.emit('update_user_list', (users_chatbox));
     });
 
     socket.on('disconnect', () => {
         console.log(socket.username + ' ' + 'disconnected');
+        user_counter--
         if (!socket.username)
             return;
         let user = undefined;
@@ -53,11 +60,16 @@ io.on('connection', (socket) => {
             if (users_chatbox[i].id === socket.id) {
                 user = users_chatbox[i];
                 users_chatbox.splice(i,1);
+                io.emit('Goodbye', { message: 'A user has left!' + ' ' + 'Bye' + ' ' + user.username});
             }
         }
         connections.splice(connections.indexOf(socket),1);
+
         io.emit('update_user_list', (users_chatbox));
     });
+
+    socket.join('room-'+room_number);
+    io.sockets.in("room-"+room_number).emit('connectToRoom', { message: "You are in room no. "+room_number});
 
 });
 

@@ -1,8 +1,10 @@
 let socket = io.connect();
+//let socket_private = ioPr.connect();
 let chat_box_display = document.getElementById("output_chat");
 let users_online_list = document.getElementById("list_users");
 let user_name_input = document.getElementById("user_name");
-
+let userArray = [];
+let user_color;
 
 document.getElementById("add_user").addEventListener("click", function () {
     user_name_input = user_name_input.value;
@@ -19,14 +21,39 @@ document.getElementById("sent_it_me").addEventListener("click", function () {
     socket.emit('sendToMe', (user_name_input + ': ' + message));
 });
 
-socket.on('displayMessage', (message) => {
-    chat_box_display.innerHTML += '<br>' + message;
+socket.on('displayMessageAll', (data) => {
+    let output_tag = document.createElement('span');
+    let output_msg = document.createTextNode(data.message);
+    let span_tag = document.createElement('br');
+    output_tag.style.color = data.color;
+    output_tag.appendChild(output_msg);
+    chat_box_display.appendChild(output_tag);
+    chat_box_display.appendChild(span_tag);
 });
 
-socket.on('usersInfo', (users_chatbox) => {
-    let user_color = users_chatbox[0]['color'];
+socket.on('displayMessageMe', (data) => {
+    let output_tag = document.createElement('span');
+    let output_msg = document.createTextNode(data.message);
+    let span_tag = document.createElement('br');
+    output_tag.style.color = data.color;
+    output_tag.appendChild(output_msg);
+    chat_box_display.appendChild(output_tag);
+    chat_box_display.appendChild(span_tag);
+});
 
-    chat_box_display.style.color = user_color;
+socket.on('announcements', (data) => {
+    console.log('Got announcement:', data.message);
+    chat_box_display.innerHTML += data.message + '<br>';
+});
+
+socket.on('Goodbye', (data) => {
+    chat_box_display.innerHTML += '<br>' + data.message;
+})
+
+socket.on('usersInfo', (users_chatbox) => {
+    userArray = [...users_chatbox];
+    let user_color = userArray[0]['color'];
+    console.log(user_color);
 });
 
 socket.on('update_user_list', (users_chatbox) => {
@@ -37,4 +64,6 @@ socket.on('update_user_list', (users_chatbox) => {
     }
 });
 
-
+socket.on('connectToRoom', (data) => {
+    document.getElementById("private_output").innerHTML = data.message;
+});
