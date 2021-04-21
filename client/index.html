@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+<div class="grid-container">
+<div class="item1">
+    <input type="text" id="user_name">
+    <button type="submit" id="add_user">Let me in!</button>
+</div>
+<div class="item2" id="list_users">
+</div>
+<div class="item3 chatBox">
+    <input type="text" id="input_chat"/>
+    <button type="button" id="sent_it_all">Send to all</button>
+    <button type="button" id="sent_it_me">Send to me</button>
+    <div class="item4" id="output_chat"></div>
+</div>
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+
+</html>
