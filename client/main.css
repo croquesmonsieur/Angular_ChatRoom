@@ -22,3 +22,8 @@
     height: 350px;
 }
 
+.room_display{
+    border: 2px solid black;
+    height: 150px;
+    width: 150px;
+}

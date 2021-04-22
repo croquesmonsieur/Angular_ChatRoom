@@ -11,6 +11,7 @@ const port = 6969;
 //const ioPr = io.of('/privateRoom');
 let room_number = 1;
 let user_counter = 0;
+let room = "Red Room";
 
 let users_chatbox = [];
 let connections = [];
@@ -68,8 +69,11 @@ io.on('connection', (socket) => {
         io.emit('update_user_list', (users_chatbox));
     });
 
-    socket.join('room-'+room_number);
-    io.sockets.in("room-"+room_number).emit('connectToRoom', { message: "You are in room no. "+room_number});
+    socket.on('room', (room) =>{
+        socket.leave();
+        socket.join(room);
+        io.sockets.in(room).emit('connectToRoom', { message: "You are very welcome in room no. "+room});
+    });
 
 });
 
